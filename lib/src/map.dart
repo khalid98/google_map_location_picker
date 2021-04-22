@@ -221,48 +221,28 @@ class MapPickerState extends State<MapPicker> {
               builder: (context, locationProvider, _) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Flexible(
-                    flex: 20,
-                    child: FutureLoadingBuilder<Map<String, String>>(
-                      future: getAddress(locationProvider.lastIdleLocation),
-                      mutable: true,
-                      loadingIndicator: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          CircularProgressIndicator(),
-                        ],
-                      ),
-                      builder: (context, data) {
-                        _address = data["address"];
-                        _placeId = data["placeId"];
-                        return Text(
-                          _address ??
-                              S.of(context)?.unnamedPlace ??
-                              'Unnamed place',
-                          style: TextStyle(fontSize: 18),
-                        );
-                      },
-                    ),
+              child: GestureDetector(
+                onTap:(){
+                  Navigator.of(context).pop({
+                    'location': LocationResult(
+                      latLng: locationProvider.lastIdleLocation,
+                      address: _address,
+                      placeId: _placeId,
+                    )
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffA0CB72),
+
+                    borderRadius: BorderRadius.circular(15.0),
                   ),
-                  Spacer(),
-                  FloatingActionButton(
-                    onPressed: () {
-                      Navigator.of(context).pop({
-                        'location': LocationResult(
-                          latLng: locationProvider.lastIdleLocation,
-                          address: _address,
-                          placeId: _placeId,
-                        )
-                      });
-                    },
-                    child: widget.resultCardConfirmIcon ??
-                        Icon(Icons.arrow_forward),
-                  ),
-                ],
+                  height: 56,
+                  alignment: Alignment.center,
+                  child:widget.resultCardConfirmIcon ?? Text("Send location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18,color:Colors.white),),
+                ),
               ),
+
             );
           }),
         ),
@@ -272,11 +252,11 @@ class MapPickerState extends State<MapPicker> {
 
   Future<Map<String, String>> getAddress(LatLng location) async {
     try {
-      final endpoint =
+      final endPoint =
           'https://maps.googleapis.com/maps/api/geocode/json?latlng=${location?.latitude},${location?.longitude}'
           '&key=${widget.apiKey}&language=${widget.language}';
 
-      final response = jsonDecode((await http.get(Uri.parse(endpoint),
+      var response = jsonDecode((await http.get(endPoint,
               headers: await LocationUtils.getAppHeaders()))
           .body);
 
@@ -297,13 +277,13 @@ class MapPickerState extends State<MapPicker> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.place, size: 56),
+            Icon(Icons.place, size: 40,color: Colors.red,),
             Container(
               decoration: ShapeDecoration(
                 shadows: [
                   BoxShadow(
                     blurRadius: 4,
-                    color: Colors.black38,
+                    color: Colors.red,
                   ),
                 ],
                 shape: CircleBorder(
@@ -470,6 +450,7 @@ class _MapFabs extends StatelessWidget {
         children: <Widget>[
           if (layersButtonEnabled)
             FloatingActionButton(
+              backgroundColor: Color(0xffA0CB72),
               onPressed: onToggleMapTypePressed,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               mini: true,
@@ -478,6 +459,8 @@ class _MapFabs extends StatelessWidget {
             ),
           if (myLocationButtonEnabled)
             FloatingActionButton(
+              backgroundColor: Color(0xffA0CB72),
+
               onPressed: onMyLocationPressed,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               mini: true,
@@ -489,3 +472,4 @@ class _MapFabs extends StatelessWidget {
     );
   }
 }
+
